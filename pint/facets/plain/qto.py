@@ -7,6 +7,7 @@ import math
 import numbers
 import warnings
 
+from ...errors import UndefinedBehavior
 from ...util import infer_base_unit
 from ...compat import (
     mip_INF,
@@ -100,10 +101,14 @@ def to_compact(
     <Quantity(10.0, 'millinewton')>
     """
 
-    if not isinstance(quantity.magnitude, numbers.Number):
-        msg = "to_compact applied to non numerical types " "has an undefined behavior."
-        w = RuntimeWarning(msg)
-        warnings.warn(w, stacklevel=2)
+    if not isinstance(quantity.magnitude, numbers.Number) and not hasattr(
+        quantity.magnitude, "nominal_value"
+    ):
+        warnings.warn(
+            "to_compact applied to non numerical types has an undefined behavior.",
+            UndefinedBehavior,
+            stacklevel=2,
+        )
         return quantity
 
     if (
